@@ -1,0 +1,17 @@
+# Dependencies
+node_modules
+
+# yarn error logs
+yarn-error.log
+
+# Environment varibales
+.env
+/service_account.json
+# Code coverage
+coverage
+
+# build folder
+dist
+
+# docker volume
+data
