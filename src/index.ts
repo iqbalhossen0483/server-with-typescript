@@ -1,6 +1,7 @@
 import mongoose from 'mongoose';
 import app from './app';
 import config from './config/config';
+import { queue, redis } from './modules/utils/queue';
 
 let server: any;
 mongoose.connect(config.mongoose.url).then(() => {
@@ -8,6 +9,13 @@ mongoose.connect(config.mongoose.url).then(() => {
   server = app.listen(config.port, () => {
     console.info(`Listening to port ${config.port}`);
   });
+});
+
+//redis and bull queue configaration;
+// Process Jobs
+queue.process(async (job) => {
+  const { packageId, userId } = job.data;
+  console.log(`Processing expiration for package ${packageId}, user ${userId}`);
 });
 
 const exitHandler = () => {
@@ -29,8 +37,10 @@ const unexpectedErrorHandler = (error: string) => {
 process.on('uncaughtException', unexpectedErrorHandler);
 process.on('unhandledRejection', unexpectedErrorHandler);
 
-process.on('SIGTERM', () => {
-  console.info('SIGTERM received');
+process.on('SIGTERM', async () => {
+  console.info('SIGTERM received, The server is sutting down...');
+  await queue.close();
+  redis.disconnect();
   if (server) {
     server.close();
   }

@@ -32,6 +32,12 @@ const envVarsSchema = Joi.object()
     AWS_BUCKET_NAME: Joi.string().required(),
     GCP_KEY_FILE_PATH: Joi.string().required(),
     GCP_BUCKET_NAME: Joi.string().required(),
+    VERTEXT_AI_PROJECT: Joi.string().optional(),
+    VERTEXT_LOCATION: Joi.string().optional(),
+    VERTEXT_MODEL: Joi.string().optional(),
+    REDIS_HOST: Joi.string().optional(),
+    REDIS_PORT: Joi.string().optional(),
+    REDIS_PASSWORD: Joi.string().optional(),
   })
   .unknown();
 
@@ -46,6 +52,7 @@ const config = {
   env: env.NODE_ENV,
   prefix: env.PREFIX,
   port: env.PORT,
+  clientUrl: env.CLIENT_URL,
   mongoose: {
     url: env.MONGODB_URL,
     options: {
@@ -74,7 +81,6 @@ const config = {
       pass: env.SMTP_PASSWORD,
     },
   },
-  clientUrl: env.CLIENT_URL,
   cors: {
     origin: env.CORS_ORIGIN === '*' ? '*' : env.CORS_ORIGIN.split(','),
     methods: env.CORS_METHODS.split(','),
@@ -97,6 +103,11 @@ const config = {
     vertext_ai_project: env.VERTEXT_AI_PROJECT,
     vertext_location: env.VERTEXT_LOCATION,
     vertext_model: env.VERTEXT_MODEL,
+  },
+  radis: {
+    host: env.REDIS_HOST,
+    port: env.REDIS_PORT,
+    password: env.REDIS_PASSWORD,
   },
 };
 

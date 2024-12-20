@@ -9,11 +9,12 @@ import {
   varifyOtp,
   verifyEmail,
 } from '../controllers/auth.controllers';
+import { postUser as postUserValidation } from '../validators/user.vilidation';
 
 const router = express.Router();
 
 // register/login
-router.route('/register').post(registerUser);
+router.route('/register').post(postUserValidation, registerUser);
 router.route('/login').post(loginUser);
 // reset pass
 router.route('/sent-otp').post(sendVefifyEmail);
