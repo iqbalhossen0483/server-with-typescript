@@ -1,7 +1,6 @@
 import cors from 'cors';
 import express, { Express, NextFunction, Request, Response } from 'express';
 import helmet from 'helmet';
-import passport from 'passport';
 import config from './config/config';
 import { authLimiter, catchAsync } from './modules/utils';
 import routes from './routes';
@@ -31,9 +30,6 @@ app.options('*', cors(corsOptions));
 // parse json request body
 app.use(express.json());
 
-// jwt authentication
-app.use(passport.initialize());
-
 // limit repeated failed requests to auth endpoints
 if (config.env === 'production') {
   app.use(`${PREFIX}/auth`, authLimiter);
@@ -52,11 +48,9 @@ app.use(`${PREFIX}`, routes);
 
 // Error-handling middleware
 app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
-  console.error(err.stack); // Log the error details
-  res.status(err.status || 500).json({
-    error: {
-      message: err.message || 'Internal Server Error',
-    },
+  console.error(err);
+  res.status(err.status || 500).send({
+    message: err.message || 'Internal Server Error',
   });
 });
 

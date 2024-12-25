@@ -6,12 +6,7 @@ const postUserSchema = Joi.object({
   email: Joi.string().email().required(),
   profile: Joi.string().optional(),
   role: Joi.string().optional(),
-  password: Joi.string()
-    .pattern(/^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]+$/)
-    .required()
-    .messages({
-      'string.pattern.base': 'Password must contain at least 1 letter and 1 number',
-    }),
+  password: Joi.string().optional(),
 });
 
 export const postUser = (req: Request, res: any, next: NextFunction) => {

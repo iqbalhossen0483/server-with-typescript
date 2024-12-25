@@ -43,59 +43,52 @@ export const isAdmin = catchAsyncError(async (req: Request, _res: Response, next
 
 // Register a User
 export const registerUser = catchAsyncError(async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    const socialLogin = req.query['social'];
-    const { name, email, password, role } = req.body;
+  const socialLogin = req.query['social'];
+  const { name, email, password, role } = req.body;
 
-    if (!name) {
-      throw { message: 'Please provide a name', status: 400 };
-    }
-    if (!email) {
-      throw { message: 'Please provide a email', status: 400 };
-    }
-
-    if (!password && !socialLogin) {
-      throw { message: 'Please provide a password', status: 400 };
-    }
-
-    const existingUser = await UserModel.findOne({ email });
-
-    if (existingUser && socialLogin) {
-      return loginUser(req, res, next);
-    }
-
-    if (existingUser) {
-      throw { message: `${email} is already registered`, status: 401 };
-    }
-
-    let hashedPassword: string = '';
-    // Hash password
-    if (!socialLogin) {
-      const salt = await genSalt(10);
-      hashedPassword = await hash(password, salt);
-    }
-
-    // Create new user
-    const createdUser = await UserModel.create({
-      name,
-      email,
-      password: hashedPassword,
-      role,
-    });
-
-    //send otp to varify email address;
-    if (!socialLogin) {
-      await sendOtp(createdUser, 'verify');
-    }
-
-    // Prepare response payload
-    const user = createdUser.toObject();
-
-    // Send token in response
-    sendToken(user, 201, res);
-  } catch (error) {
-    next(error);
+  if (!name) {
+    throw { message: 'Please provide a name', status: 400 };
   }
+  if (!email) {
+    throw { message: 'Please provide a email', status: 400 };
+  }
+
+  if (!password && !socialLogin) {
+    throw { message: 'Please provide a password', status: 400 };
+  }
+
+  const existingUser = await UserModel.findOne({ email });
+
+  if (existingUser && socialLogin) {
+    return loginUser(req, res, next);
+  }
+
+  if (existingUser) {
+    throw { message: `${email} is already registered`, status: 401 };
+  }
+
+  // Hash password
+  const salt = await genSalt(10);
+  const hashedPassword = await hash(password, salt);
+
+  // Create new user
+  const createdUser = await UserModel.create({
+    name,
+    email,
+    password: hashedPassword,
+    role,
+  });
+
+  //send otp to varify email address;
+  if (!socialLogin) {
+    await sendOtp(createdUser, 'verify');
+  }
+
+  // Prepare response payload
+  const user = createdUser.toObject();
+
+  // Send token in response
+  sendToken(user, 201, res);
 });
 
 // Login User
@@ -112,7 +105,6 @@ export const loginUser = catchAsyncError(async (req: Request, res: Response, nex
     if (!user) {
       throw { message: 'Invalid Email or Password', status: 401 };
     }
-
     const userPassword = user.password;
     const comparePassword = await compare(password, userPassword);
 
@@ -123,6 +115,7 @@ export const loginUser = catchAsyncError(async (req: Request, res: Response, nex
     const userData = user.toObject();
     sendToken(userData, 200, res);
   } catch (error) {
+    console.log({ error });
     next(error);
   }
 });
@@ -153,7 +146,7 @@ export const sendOtp = async (user: User, type: 'verify' | 'reset') => {
     name: user.name,
     email: user.email,
     otp: parseInt(getOtp),
-    subject: 'Forgot Password OTP',
+    subject: type === 'verify' ? 'Verify your email' : 'Reset your password',
     type,
   });
 
